@@ -29,13 +29,27 @@ def input_puzzle(filename):
         f.write(rows[i] + "\n")
     f.close()
 
+# Converts the string of numbers to an array of numbers
+def string_to_array(textline):
+    sudoku_matrix = np.zeros((9,9), dtype = int)
+    for index in range(len(textline)):
+        if not textline[index] in ["0", "\n"]:
+            row = index // 10
+            column = index % 10
+            try:
+                sudoku_matrix[row][column] = int(textline[index])
+            except Exception as error:
+                print("Error when inserting values for ({0},{1})".format(row, column))
+                return error
+    return sudoku_matrix
+
 # function to obtain all constraints in the form of matrix
-def obtain_constraints(textline):
+def obtain_constraints(sudoku_matrix):
     cell_constraints = find_cell_constraints()
     row_constraints = find_row_constraints()
     column_constraints = find_column_constraints()
     box_constraints = find_box_constraints()
-    value_constraints = find_value_constraints(textline)
+    value_constraints = find_value_constraints(sudoku_matrix)
     constraints = np.vstack((cell_constraints, row_constraints, 
                              column_constraints, box_constraints, 
                              value_constraints))
@@ -90,18 +104,18 @@ def find_box_constraints():
     return all_box_constraints
 
 
-def find_value_constraints(textline):
+def find_value_constraints(sudoku_matrix):
     value_constraints = np.empty((0,729), int)
-    for idx in range(len(textline)):
-        if textline[idx] != "0" and textline[idx] != "\n":
-            row = math.floor(idx / 10)
-            col = idx % 10
-            value = int(textline[idx])
-            constraint = np.zeros(729, dtype = int)
-            constraint_idx = (81 * row) + (9 * col) + (value - 1)
-            constraint[constraint_idx] = 1
-            value_constraints = np.vstack((value_constraints, constraint))
+    for row_num in range(len(sudoku_matrix)):
+        for col_num in range(len(sudoku_matrix)):
+            if sudoku_matrix[row_num][col_num] != 0:
+                value = sudoku_matrix[row_num][col_num]
+                constraint = np.zeros(729, dtype = int)
+                constraint_idx = (81 * row_num) + (9 * col_num) + (value - 1)
+                constraint[constraint_idx] = 1
+                value_constraints = np.vstack((value_constraints, constraint))
     return (value_constraints)
+    
 
 def solve_sudoku(A):
     num_constraints = np.shape(A)[0]
@@ -116,30 +130,24 @@ def solve_sudoku(A):
     sudoku_problem = cvxpy.Problem(cvxpy.Maximize(obj), [constraint])
     sudoku_problem.solve(solver = cvxpy.GUROBI)
     if obj.value != 81:
-        print("Wrong Calculation")
-    return (x.value)
+        print("Wrong Calculation or Error in Puzzle")
+    return (x.value.astype(int))
 
 def print_solution(result_vector):
     result_matrix = np.zeros((9,9), dtype = int)
+    vector_to_array = result_vector.reshape((9,9,9))
+    for n in range(9):
+        result_matrix += ((n+1) * vector_to_array[:,:,n])
+    
     for i in range(0,9):
         for j in range(0,9):
-            cell_start = (81 * i) + (9 * j)
-            cell_end = (81 * i) + (9 * j) + 9
-            for k in range(cell_start, cell_end):
-                if result_vector[k][0] == 1:
-                    value = (k + 1) % 9
-                    if value == 0:
-                        value = 9
-                    result_matrix[i][j] = value
-                    print(str(value), end = "")
-                    continue
-            if j == 2 or j ==5:
+            print(result_matrix[i][j], end = "")
+            if j in [2,5]:
                 print("|", end = "")
         print("")
-        if i == 2 or i == 5:
+        if i in [2,5]:
             print("---+---+---")
     return (result_matrix)
-
 
 # ask for puzzle to solve
 filename = input("File name for Sudoku puzzle: ")
@@ -153,7 +161,8 @@ finally:
     f.close()
 
 # find value constraints
-constraint_matrix = obtain_constraints(lines)
+sudoku_problem = string_to_array(lines)
+constraint_matrix = obtain_constraints(sudoku_problem)
 start_time = time.time()
 result = solve_sudoku(constraint_matrix)
 end_time = time.time()
