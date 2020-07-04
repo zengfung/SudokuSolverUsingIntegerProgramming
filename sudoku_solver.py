@@ -1,47 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jun  5 00:12:22 2020
-
-@author: Zeng Fung Liew
-Sudoku Solver
-"""
-
 import math
 import numpy as np
 import cvxpy
 import time
-
-# function to call for input of puzzle
-def input_puzzle(filename):
-    print("No such file exists. Please write the puzzle row by row.")
-    f = open(filename, "w+")
-
-    rows = [""] * 9
-    
-    for i in range(9):
-        rows[i] = input("Print row " + str(i+1) + " (input 0 for empty cells): ")
-        if rows[i] == "exit":
-            break
-        while len(rows[i]) != 9:
-            rows[i] = input("Incorrect number of input, try again: ")
-            if rows[i] == "exit":
-                break
-        f.write(rows[i] + "\n")
-    f.close()
-
-# Converts the string of numbers to an array of numbers
-def string_to_array(textline):
-    sudoku_matrix = np.zeros((9,9), dtype = int)
-    for index in range(len(textline)):
-        if not textline[index] in ["0", "\n"]:
-            row = index // 10
-            column = index % 10
-            try:
-                sudoku_matrix[row][column] = int(textline[index])
-            except Exception as error:
-                print("Error when inserting values for ({0},{1})".format(row, column))
-                return error
-    return sudoku_matrix
 
 # function to obtain all constraints in the form of matrix
 def obtain_constraints(sudoku_matrix):
@@ -116,8 +76,7 @@ def find_value_constraints(sudoku_matrix):
                 value_constraints = np.vstack((value_constraints, constraint))
     return (value_constraints)
     
-
-def solve_sudoku(A):
+def solve_constraints(A):
     num_constraints = np.shape(A)[0]
     num_var = np.shape(A)[1]
     # constraints formulation of Ax=b
@@ -138,46 +97,14 @@ def print_solution(result_vector):
     vector_to_array = result_vector.reshape((9,9,9))
     for n in range(9):
         result_matrix += ((n+1) * vector_to_array[:,:,n])
-    
-    for i in range(0,9):
-        for j in range(0,9):
-            print(result_matrix[i][j], end = "")
-            if j in [2,5]:
-                print("|", end = "")
-        print("")
-        if i in [2,5]:
-            print("---+---+---")
     return (result_matrix)
 
-# ask for puzzle to solve
-filename = input("File name for Sudoku puzzle: ")
-try:
-    f = open(filename, "r")
-except:
-    input_puzzle(filename)
-    f = open(filename, "r")
-finally:
-    lines = f.read()
-    f.close()
-
-# find value constraints
-sudoku_problem = string_to_array(lines)
-constraint_matrix = obtain_constraints(sudoku_problem)
-start_time = time.time()
-result = solve_sudoku(constraint_matrix)
-end_time = time.time()
-result_matrix = print_solution(result)
-solve_time = end_time - start_time
-print ("Solve time: ", solve_time, " seconds")
-
-# write solutions file
-solutions_file = "solutions_" + filename
-sf = open(solutions_file, "w+")
-for i in range(0,9):
-    for j in range(0,9):
-        sf.write(str(result_matrix[i][j]))
-    sf.write("\n")
-sf.close()
-
-# add something random here that is useless
-
+def solve_sudoku(input_problem):
+    sudoku_problem = input_problem[:]
+    constraint_matrix = obtain_constraints(sudoku_problem)
+    start_time = time.time()
+    result = solve_constraints(constraint_matrix)
+    end_time = time.time()
+    solve_time = end_time - start_time
+    result_matrix = print_solution(result)
+    return (result_matrix, solve_time)
