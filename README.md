@@ -1,5 +1,9 @@
 # sudoku_solver
-Note: Majority of the code in `main.py` in building the user interface of the sudoku board was referenced from http://newcoder.io/gui/part-4/. Special thanks and credits to the author(s) of those codes.
+Note: 
+
+* Majority of the code in `main.py` in building the user interface of the sudoku board was referenced from http://newcoder.io/gui/part-4/. Special thanks and credits to the author(s) of those codes.
+
+* To download and run the files, users have to have the GUROBI solver and license key installed in their computers.
 
 The process of building the sudoku solver is split into 2 distinct sections:
 
