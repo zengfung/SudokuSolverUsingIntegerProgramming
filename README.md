@@ -13,8 +13,8 @@ The process of building the sudoku solver is split into 2 distinct sections:
 3) Once the puzzle is copied into the sudoku board, click 'Solve' on the right hand side of the window and the solution will be displayed.
 4) Click 'Restart' to clear the board and solve another puzzle.
 
-## Possible errors that can arise
-1) If an invalid puzzle is input into the board, the entire window will freeze. I will need to work on error handling where an error message pops up if there is no solution to the puzzle.
+## Error Handling
+If an invalid puzzle is input into the board, "Sorry, this is not a valid puzzle. Try again." will be printed under the board. The user will then have to edit the error(s) on the sudoku board, or clear the board and try again.
 
 ## More Information on How This Works
 The file 'Sudoku Solve.ipynb' contains more information regarding the logistics and how my sudoku solver works. Please refer to it for better explanations.

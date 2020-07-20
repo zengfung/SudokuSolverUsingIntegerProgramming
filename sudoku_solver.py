@@ -89,7 +89,7 @@ def solve_constraints(A):
     sudoku_problem = cvxpy.Problem(cvxpy.Maximize(obj), [constraint])
     sudoku_problem.solve(solver = cvxpy.GUROBI)
     if obj.value != 81:
-        print("Wrong Calculation or Error in Puzzle")
+        return 'fail'
     return (x.value.astype(int))
 
 def print_solution(result_vector):
@@ -104,6 +104,8 @@ def solve_sudoku(input_problem):
     constraint_matrix = obtain_constraints(sudoku_problem)
     start_time = time.time()
     result = solve_constraints(constraint_matrix)
+    if result == 'fail':
+        return ('no solution', 'no time')
     end_time = time.time()
     solve_time = end_time - start_time
     result_matrix = print_solution(result)

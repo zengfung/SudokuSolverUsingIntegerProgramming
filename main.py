@@ -1,4 +1,3 @@
-import argparse
 from tkinter import *
 import tkinter.font as font
 import numpy as np
@@ -150,8 +149,6 @@ class SudokuUI(Frame):
             self.board.create_rectangle(x0, y0, x1, y1,
                 outline = "red", fill = "yellow", stipple = "gray12", tags = "cursor")
 
-# NEED TO FIGURE OUT HOW TO ENTER NUMBER INTO THE CELLS
-# AND STORE THE INPUT SOMEWHERE IN PROGRAM'S MEMORY
     def __key_pressed(self, event):
         # if a cell is selected/highlighted, obtain input
         if self.row >= 0 and self.col >= 0 and event.char in "1234567890":
@@ -193,11 +190,17 @@ class SudokuUI(Frame):
 
     def __solve(self):
         (self.solution, self.time_taken) = sudoku_solver.solve_sudoku(self.game)
-        self.__draw_solution()
-        self.result_time.set("Time taken: " + str(self.time_taken) + " seconds")
+        if self.solution == 'no solution':
+            self.result_time.set("Sorry, this is not a valid puzzle. Try again.")
 
-        self.result_time_label = Label(self.parent, textvariable = self.result_time, font = font.Font(size = 15))
-        self.result_time_label.grid(row = 10, column = 0, columnspan = 10)
+            self.result_time_label = Label(self.parent, textvariable = self.result_time, font = font.Font(size = 15))
+            self.result_time_label.grid(row = 10, column = 0, columnspan = 10)
+        else:
+            self.__draw_solution()
+            self.result_time.set("Time taken: " + str(self.time_taken) + " seconds")
+
+            self.result_time_label = Label(self.parent, textvariable = self.result_time, font = font.Font(size = 15))
+            self.result_time_label.grid(row = 10, column = 0, columnspan = 10)
 
     def __clear_board(self):
         self.game = np.zeros((9,9), dtype = int)
